@@ -1,7 +1,8 @@
-apply plugin: 'java'
+apply plugin: 'java', 'maven-publish'
 
 sourceCompatibility = 21
 targetCompatibility = 21
+
 
 repositories {
     mavenCentral()
@@ -32,3 +33,23 @@ task fatJar(type: Jar) {
     from { configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
 }
+
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact tasks.fatJar
+        }
+    }
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = "https://maven.pkg.github.com/portswigger-techsupport/albinowaxUtils"
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+}
+
