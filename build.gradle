@@ -3,9 +3,6 @@ plugins {
     id 'maven-publish'
 }
 
-group = 'albinowax'
-version = '1.4.1'
-
 java {
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
@@ -30,21 +27,37 @@ sourceSets {
     }
 }
 
-archivesBaseName = 'albinowaxUtils-all'
+group = 'albinowax'
+version = '1.4.2'
+archivesBaseName = 'albinowaxUtils'
+
+// Suppress deprecation warnings during compilation
+tasks.withType(JavaCompile) {
+    options.compilerArgs << "-Xlint:-deprecation"
+}
 
 tasks.register('fatJar', Jar) {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    archiveClassifier.set('fat') // Add a classifier to distinguish the fat JAR
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
-    with(tasks.getByName("jar")) // Fixed method to reference the 'jar' task
+    with(tasks.getByName("jar"))
 }
 
 publishing {
     publications {
         gpr(MavenPublication) {
+            // Remove the default JAR artifact
+            artifacts.clear()
+            
             from(components.java)
-            artifact(tasks.named('fatJar').get()) // Use 'tasks.named' to access the fatJar task
+            artifactId = 'albinowaxUtils' // Explicitly set artifactId
+
+            // Add the fat JAR artifact
+            artifact(tasks.named('fatJar').get()) {
+                classifier = 'fat'
+            }
         }
     }
     repositories {
@@ -52,14 +65,14 @@ publishing {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/portswigger-katie/albinowaxUtils")
             credentials {
-                username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_ACTOR")
-                password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
+                username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+                password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
             }
         }
     }
 }
 
+// Explicit dependency for generateMetadataFileForGprPublication
 tasks.named('generateMetadataFileForGprPublication').configure {
     dependsOn tasks.named('fatJar')
 }
-
