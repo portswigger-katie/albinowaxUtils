@@ -59,3 +59,7 @@ publishing {
     }
 }
 
+tasks.named('generateMetadataFileForGprPublication').configure {
+    dependsOn tasks.named('fatJar')
+}
+
