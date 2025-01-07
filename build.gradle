@@ -42,7 +42,8 @@ tasks.register('fatJar', Jar) {
 
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        gpr(MavenPublication) {
+            from(components.java)
             artifact(tasks.named('fatJar').get()) // Use 'tasks.named' to access the fatJar task
         }
     }
@@ -51,8 +52,8 @@ publishing {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/portswigger-katie/albinowaxUtils")
             credentials {
-                username = System.getenv("GITHUB_ACTOR")
-                password = System.getenv("GITHUB_TOKEN")
+                username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_ACTOR")
+                password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
             }
         }
     }
