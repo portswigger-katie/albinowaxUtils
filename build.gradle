@@ -38,7 +38,7 @@ tasks.withType(JavaCompile) {
 
 tasks.register('fatJar', Jar) {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    archiveClassifier.set('fat') // Add a classifier to distinguish the fat JAR
+    archiveClassifier.set('') // Remove classifier so this becomes the primary artifact
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
@@ -48,16 +48,8 @@ tasks.register('fatJar', Jar) {
 publishing {
     publications {
         gpr(MavenPublication) {
-            // Remove the default JAR artifact
-            artifacts.clear()
-            
-            from(components.java)
-            artifactId = 'albinowaxUtils' // Explicitly set artifactId
-
-            // Add the fat JAR artifact
-            artifact(tasks.named('fatJar').get()) {
-                classifier = 'fat'
-            }
+            // Exclude the default JAR artifact
+            artifact(tasks.named('fatJar').get())
         }
     }
     repositories {
