@@ -1,12 +1,15 @@
-apply plugin: 'java'
-apply plugin: 'maven-publish'
+plugins {
+    id 'java'
+    id 'maven-publish'
+}
 
 group = 'albinowax'
 version = '1.4'
 
-sourceCompatibility = 21
-targetCompatibility = 21
-
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
 
 repositories {
     mavenCentral()
@@ -14,7 +17,6 @@ repositories {
 
 dependencies {
     implementation 'net.portswigger.burp.extender:burp-extender-api:2.3'
-    //implementation files('montoya-api-2024.12.3.jar')
     implementation 'net.portswigger.burp.extensions:montoya-api:2023.10.3'
     implementation 'org.apache.commons:commons-lang3:3.5'
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.1'
@@ -25,30 +27,29 @@ sourceSets {
         java {
             srcDir 'src'
         }
-//        resources {
-//            srcDir 'resources'
-//        }
     }
 }
-archivesBaseName = ('albinowaxUtils-all')
 
-task fatJar(type: Jar) {
+archivesBaseName = 'albinowaxUtils-all'
+
+tasks.register('fatJar', Jar) {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    from { configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    with(tasks.getByName("jar")) // Fixed method to reference the 'jar' task
 }
-
 
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact tasks.fatJar
+            artifact(tasks.named('fatJar').get()) // Use 'tasks.named' to access the fatJar task
         }
     }
     repositories {
         maven {
             name = "GitHubPackages"
-            url = "https://maven.pkg.github.com/portswigger-techsupport/albinowaxUtils"
+            url = uri("https://maven.pkg.github.com/portswigger-techsupport/albinowaxUtils")
             credentials {
                 username = System.getenv("GITHUB_ACTOR")
                 password = System.getenv("GITHUB_TOKEN")
