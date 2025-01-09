@@ -22,5 +22,5 @@ jobs:
       - name: Publish package
         run: ./gradlew publish --warning-mode none
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          GITHUB_ACTOR: ${{ github.actor }}
+          TOKEN: ${{ secrets.TOKEN }}
+          USERNAME: ${{ github.actor }}

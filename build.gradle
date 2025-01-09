@@ -27,9 +27,9 @@ sourceSets {
     }
 }
 
-group = 'albinowax'
-version = '1.4.2'
-archivesBaseName = 'albinowaxUtils'
+group = 'libary'
+version = '1.4'
+archivesBaseName = 'albinowax-utils'
 
 // Suppress deprecation warnings during compilation
 tasks.withType(JavaCompile) {
@@ -38,7 +38,7 @@ tasks.withType(JavaCompile) {
 
 tasks.register('fatJar', Jar) {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    archiveClassifier.set('') // Remove classifier so this becomes the primary artifact
+    archiveClassifier.set('fat') // Remove classifier so this becomes the primary artifact
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
@@ -48,8 +48,10 @@ tasks.register('fatJar', Jar) {
 publishing {
     publications {
         gpr(MavenPublication) {
-            // Exclude the default JAR artifact
-            artifact(tasks.named('fatJar').get())
+            artifactId 'albinowax-utils' //This has to be all lowercase or you'll get a horrible 422 error
+            artifact(tasks.named('fatJar').get()){
+                classifier = 'fat'
+            }
         }
     }
     repositories {

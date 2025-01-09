@@ -1,0 +1,26 @@
+name: Pull Published Package
+
+on:
+  workflow_dispatch: # Allows manual trigger
+  schedule:
+    - cron: "0 0 * * *" # Runs daily at midnight
+
+jobs:
+  pull-package:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the current repository (optional)
+      - name: Checkout Current Repo
+        uses: actions/checkout@v4
+
+      # Step 2: Authenticate with GitHub Packages
+      - name: Authenticate with GitHub Packages
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      # Step 3: Pull the package from another repository
+      - name: Pull Package
+        run: |
+          PACKAGE_NAME="portswigger-katie/albinowaxUtils"
+          PACKAGE_VERSION="latest" # Replace with specific version if needed
+          docker pull ghcr.io/$PACKAGE_NAME:$PACKAGE_VERSION
